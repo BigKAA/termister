@@ -103,15 +103,14 @@ class Termister:
     def list(self):
         """Выводим на экран список хостов разделённый по группамм"""
         for group in self.groups:
-            print(f"{Bcolors.HEADER}" + group.name + "\t" + group.description
-                  + f"{Bcolors.ENDC}")
+            print(f"{Bcolors.HEADER}" + group.description + f"{Bcolors.ENDC}")
             for host in group.hosts:
-                print(f'{Bcolors.OKGREEN}\tHost: {Bcolors.ENDC}' + host.host
+                print(f'\t{Bcolors.OKGREEN}Host: {Bcolors.ENDC}' + host.host
+                      + f'\t{Bcolors.OKBLUE}' + host.description + f'{Bcolors.ENDC}'
                       + f'\t{Bcolors.OKGREEN}Port: {Bcolors.ENDC}'
                       + str(host.port)
                       + f'\t{Bcolors.OKGREEN}User: {Bcolors.ENDC}'
-                      + str(host.user) + f'\t{Bcolors.OKGREEN}'
-                      + host.description + f'{Bcolors.ENDC}')
+                      + str(host.user) )
 
     def find_host(self, find_host):
         """Поиск хоста в группах"""
