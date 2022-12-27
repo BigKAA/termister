@@ -83,11 +83,11 @@ group:
 - moon:
     description: "moon servers"
     hosts:
-    - host: 192.168.0.17
+    - host: moon.server.net
       port: 22
       user: root
       description: Server for test 3 on the moon group
-    - host: 192.168.0.18
+    - host: pluto.server.net
       port: 22
       user: root
       description: Server for test 4
