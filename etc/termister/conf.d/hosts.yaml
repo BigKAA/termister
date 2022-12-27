@@ -1,0 +1,25 @@
+---
+organization: chimmed
+groups:
+  - solar:
+      description: "Solar servers"
+      hosts:
+        - host: 192.168.0.134
+          port: 22
+          user: artur
+          description: Solar system
+        - host: 192.168.0.8
+          port: 22
+          user: root
+          description: Solar system  2
+  - Beta:
+      description: "Beta servers"
+      hosts:
+        - host: 192.168.0.17
+          port: 22
+          user: root
+          description: Server for test 3
+        - host: 192.168.0.18
+          port: 12332
+          user: root
+          description: Server for test 4
