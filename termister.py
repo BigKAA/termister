@@ -101,7 +101,7 @@ class Termister:
                         tgroup.hosts.append(thost)
 
     def list(self):
-        """Выводим на экран список хостов разделённый по группамм"""
+        """Выводим на экран список хостов разделённый по группам"""
         for group in self.groups:
             print(f"{Bcolors.HEADER}" + group.description + f"{Bcolors.ENDC}")
             for host in group.hosts:
