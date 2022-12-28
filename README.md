@@ -73,12 +73,6 @@ moon    Moon servers
 
 Остальные параметры подключения будут взяты из конфигурационного файла.
 
-Для работы программы необходим Python3 и пара библиотек из файла `requirements.txt`.
-
-```shell
-pip3 install -r requirements.txt
-```
-
 ## Config files
 
 Расположение основного конфигурационного файла определяется параметром `-c` или `--configfile`.
@@ -126,3 +120,11 @@ group:
       user: root
       description: Server for test 4
  ```
+
+## Дополнительные библиотеки
+
+Для работы программы необходим Python3 и пара библиотек из файла `requirements.txt`.
+
+```shell
+pip3 install -r requirements.txt
+```
