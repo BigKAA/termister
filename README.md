@@ -94,7 +94,6 @@ configDirectory: conf.d
 
  ```yaml
  ---
-organization: My organization
 description: For any case
 group:
 - solar:
