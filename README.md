@@ -8,7 +8,10 @@
 нет. Как вариант использовать java... Решил не извращаться и написать оболочку для командной
 строки.
 
-Получение списка серверов:
+## Команды
+### list
+
+Получение списка серверов.
 
 ```shell
 ./termister.py list
@@ -30,6 +33,37 @@ Beta    Beta servers
         Host: 192.168.0.17      Port: 22        User: root      Server for test 3
         Host: 192.168.0.18      Port: 12332     User: root      Server for test 4
 ```
+
+В качестве дополнительного параметра можно указать регулярное выражение для поиска в именах хостов.
+
+```bash
+./termister.py list 192.168.10
+```
+
+На стандартном выводе:
+
+```
+moon    Moon servers
+        Host: 192.168.10.5      Server for test 1       Port: 22        User: root
+        Host: 192.168.10.8      Server for test 2       Port: 22        User: root
+romb    Romb servers
+solar   Solar servers
+Beta    Beta servers
+```
+
+Параметр `-g group_name` ограничивает вывод списка серверов из одной группы.
+
+```bash
+./termister.py list -g moon
+```
+
+```
+moon    Moon servers
+        Host: 192.168.10.5      Server for test 1       Port: 22        User: root
+        Host: 192.168.10.8      Server for test 2       Port: 22        User: root
+```
+
+### host
 
 Подключение к серверу:
 
