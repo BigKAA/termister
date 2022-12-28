@@ -1,5 +1,4 @@
 ---
-organization: chimmed
 groups:
   - moon:
       description: "Moon servers"
