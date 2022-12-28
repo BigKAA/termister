@@ -1,5 +1,4 @@
 ---
-organization: chimmed
 groups:
   - solar:
       description: "Solar servers"
