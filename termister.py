@@ -6,7 +6,7 @@ import os
 import platform
 import sys
 import ruamel.yaml
-
+import re
 
 class Bcolors:
     """Набор цветов для вывода в консоли"""
@@ -100,11 +100,20 @@ class Termister:
                                       description=host['description'])
                         tgroup.hosts.append(thost)
 
-    def list(self):
+    def list(self, search_string, search_group):
         """Выводим на экран список хостов разделённый по группам"""
         for group in self.groups:
-            print(f"{Bcolors.HEADER}" + group.description + f"{Bcolors.ENDC}")
+            # Учитываем название группы при поиске
+            if search_group is not None:
+                if search_group != group.name:
+                    continue
+            print(f"{Bcolors.HEADER}" + group.name + "\t" + group.description + f"{Bcolors.ENDC}")
             for host in group.hosts:
+                # Учитываем название хоста при поиске
+                if search_string != "":
+                    regexp = re.compile(search_string)
+                    if not regexp.match(host.host):
+                        continue
                 print(f'\t{Bcolors.OKGREEN}Host: {Bcolors.ENDC}' + host.host
                       + f'\t{Bcolors.OKBLUE}' + host.description + f'{Bcolors.ENDC}'
                       + f'\t{Bcolors.OKGREEN}Port: {Bcolors.ENDC}'
@@ -141,8 +150,9 @@ class Termister:
 if __name__ == "__main__":
     # Разбор параметров программы
     parser = argparse.ArgumentParser(description="Run ssh connetction to host from list.",
-                                     usage="%(prog)s list|host HOSTNAME [-c CONFIGFILE]")
+                                     usage="%(prog)s list [HOSTNAME_REGEXP] | host HOSTNAME [-c CONFIGFILE] [-g GROUP]")
     parser.add_argument('command', nargs='*')
+    parser.add_argument('-g', '--group', help='show hosts from current group')
     parser.add_argument('-c', '--configfile',
                         help='if CONFIGFILE not set, use env variable TER_CONF. If env not set< default value "/etc/termister/termister.yaml"')
     # parser.add_argument('-v', '--verbose', action='store_true')
@@ -171,10 +181,14 @@ if __name__ == "__main__":
 
     # select and run command
     if args.command[0] == 'list':
-        if len(args.command) != 1:
+        if len(args.command) == 1:
+            termister.list("", args.group)
+        elif len(args.command) == 2:
+            termister.list(args.command[1], args.group)
+        else:
             print('Invalid numbers of argument command "list"', file=sys.stderr)
             sys.exit(1)
-        termister.list()
+        
     elif args.command[0] == 'host':
         if len(args.command) != 2:
             print('Invalid numbers of argument command "host"', file=sys.stderr)
