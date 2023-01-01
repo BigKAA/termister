@@ -22,21 +22,6 @@ class Bcolors:
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
-
-class TGroup:
-    """Группы хостов"""
-
-    def __init__(self, name, description):
-        super().__init__()
-        self.name = name
-        self.description = description
-        self.hosts = []
-
-    def __iter__(self):
-        for each in self.__dict__.values():
-            yield each
-
-
 class THost:
     """Параметры хостов"""
 
@@ -51,6 +36,19 @@ class THost:
         for each in self.__dict__.values():
             yield each
 
+class TGroup:
+    """Группы хостов"""
+
+    def __init__(self, name, description):
+        super().__init__()
+        self.name = name
+        self.description = description
+        self.hosts :list(THost) = []
+
+    def __iter__(self):
+        for each in self.__dict__.values():
+            yield each
+
 
 class Termister:
     """main class"""
@@ -59,7 +57,7 @@ class Termister:
         super().__init__()
         self.config_file = config_file
         self.config_dir = ""
-        self.groups = []
+        self.groups :list(TGroup) = []
         self.load_config()
 
     def load_config(self):
