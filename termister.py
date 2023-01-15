@@ -8,6 +8,10 @@ import sys
 
 import ruamel.yaml
 
+"""
+termister v0.0.3
+"""
+
 conf_file = "/etc/termister/termister.yaml"
 
 
@@ -222,6 +226,9 @@ def run_app(commands: list) -> None:
         case ["search" | "s", host]:
             termister = Termister(config_file=conf_file)
             termister.search(host)
+        case [host]:
+            termister = Termister(config_file=conf_file)
+            termister.connect_to_host(host)
         case _:
             print(f"Unknown command: {' '.join(commands)}")
             usage()
