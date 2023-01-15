@@ -222,8 +222,6 @@ def run_app(commands: list) -> None:
         case ["search" | "s", host]:
             termister = Termister(config_file=conf_file)
             termister.search(host)
-        case [host]:
-            print(f"host - {host}")
         case _:
             print(f"Unknown command: {' '.join(commands)}")
             usage()
