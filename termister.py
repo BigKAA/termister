@@ -1,12 +1,14 @@
 #! python3
 
-import argparse
 import glob
 import os
 import platform
-import sys
-import ruamel.yaml
 import re
+import sys
+
+import ruamel.yaml
+
+conf_file = "/etc/termister/termister.yaml"
 
 
 class Bcolors:
@@ -22,6 +24,7 @@ class Bcolors:
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
+
 class THost:
     """Параметры хостов"""
 
@@ -36,6 +39,7 @@ class THost:
         for each in self.__dict__.values():
             yield each
 
+
 class TGroup:
     """Группы хостов"""
 
@@ -43,11 +47,23 @@ class TGroup:
         super().__init__()
         self.name = name
         self.description = description
-        self.hosts :list(THost) = []
+        self.hosts: list(THost) = []
 
     def __iter__(self):
         for each in self.__dict__.values():
             yield each
+
+
+def print_host(host: THost):
+    print(f"\t{Bcolors.OKGREEN}Host: {Bcolors.ENDC}"
+          + host.host
+          + f"\t{Bcolors.OKBLUE}"
+          + host.description
+          + f"{Bcolors.ENDC}"
+          + f"\t{Bcolors.OKGREEN}Port: {Bcolors.ENDC}"
+          + str(host.port)
+          + f"\t{Bcolors.OKGREEN}User: {Bcolors.ENDC}"
+          + str(host.user))
 
 
 class Termister:
@@ -57,7 +73,7 @@ class Termister:
         super().__init__()
         self.config_file = config_file
         self.config_dir = ""
-        self.groups :list(TGroup) = []
+        self.groups: list(TGroup) = []
         self.load_config()
 
     def load_config(self):
@@ -68,17 +84,17 @@ class Termister:
                 data = YAML.load(file)
                 if platform.system() == "Windows":
                     self.config_dir = (
-                        os.path.dirname(self.config_file)
-                        + "\\"
-                        + data["configDirectory"]
-                        + "\\"
+                            os.path.dirname(self.config_file)
+                            + "\\"
+                            + data["configDirectory"]
+                            + "\\"
                     )
                 else:
                     self.config_dir = (
-                        os.path.dirname(self.config_file)
-                        + "/"
-                        + data["configDirectory"]
-                        + "/"
+                            os.path.dirname(self.config_file)
+                            + "/"
+                            + data["configDirectory"]
+                            + "/"
                     )
         except FileNotFoundError:
             print("No config file:" + self.config_file + "!", file=sys.stderr)
@@ -116,37 +132,55 @@ class Termister:
                         )
                         tgroup.hosts.append(thost)
 
-    def list(self, search_string, search_group):
-        """Выводим на экран список хостов разделённый по группам"""
+    def print_group(self, group: TGroup):
+        print(f"{Bcolors.HEADER} {group.name} \t {group.description}{Bcolors.ENDC}")
+
+    def print_host(self, host: THost):
+        print(f"\t{Bcolors.OKGREEN}Host: {Bcolors.ENDC}"
+              + host.host
+              + f"\t{Bcolors.OKBLUE}"
+              + host.description
+              + f"{Bcolors.ENDC}"
+              + f"\t{Bcolors.OKGREEN}Port: {Bcolors.ENDC}"
+              + str(host.port)
+              + f"\t{Bcolors.OKGREEN}User: {Bcolors.ENDC}"
+              + str(host.user))
+
+    def list(self, list_groups: list):
+        """
+        Выводим на экран список хостов разделённый по группам
+
+        Parameters:
+            list_groups - список групп, хосты которых необходимо показывать.
+            Если он пустой, показываем все группы
+        """
+        # Перебираем список групп, загруженных из конфиг файла
         for group in self.groups:
             # Учитываем название группы при поиске
-            if search_group is not None:
-                if search_group != group.name:
+            if len(list_groups) != 0:
+                if group.name not in list_groups:
                     continue
-            print(
-                f"{Bcolors.HEADER}"
-                + group.name
-                + "\t"
-                + group.description
-                + f"{Bcolors.ENDC}"
-            )
+            self.print_group(group)
             for host in group.hosts:
-                # Учитываем название хоста при поиске
-                if search_string != "":
-                    regexp = re.compile(search_string)
-                    if not regexp.match(host.host):
-                        continue
-                print(
-                    f"\t{Bcolors.OKGREEN}Host: {Bcolors.ENDC}"
-                    + host.host
-                    + f"\t{Bcolors.OKBLUE}"
-                    + host.description
-                    + f"{Bcolors.ENDC}"
-                    + f"\t{Bcolors.OKGREEN}Port: {Bcolors.ENDC}"
-                    + str(host.port)
-                    + f"\t{Bcolors.OKGREEN}User: {Bcolors.ENDC}"
-                    + str(host.user)
-                )
+                self.print_host(host)
+
+    def search(self, f_host):
+        """
+        Поиск хоста в группах по полному и неполному имени или IP адресу
+
+         Parameters:
+             host - имя, IP адрес или их часть.
+
+        """
+        for group in self.groups:
+            self.print_group(group)
+            for host in group.hosts:
+                if host != "":
+                    regexp = re.compile(str(f_host))
+                    if regexp.search(host.host) is None:
+                        if regexp.search(host.description) is None:
+                            continue
+                    self.print_host(host)
 
     def find_host(self, find_host):
         """Поиск хоста в группах"""
@@ -175,59 +209,36 @@ class Termister:
         os.system(runcommand)
 
 
-if __name__ == "__main__":
-    # Разбор параметров программы
-    parser = argparse.ArgumentParser(
-        description="Run ssh connetction to host from list.",
-        usage="%(prog)s list [HOSTNAME_REGEXP] | host HOSTNAME [-c CONFIGFILE] [-g GROUP]",
-    )
-    parser.add_argument("command", nargs="*")
-    parser.add_argument("-g", "--group", help="show hosts from current group")
-    parser.add_argument(
-        "-c",
-        "--configfile",
-        help='if CONFIGFILE not set, use env variable TER_CONF. If env not set< default value "/etc/termister/termister.yaml"',
-    )
-    # parser.add_argument('-v', '--verbose', action='store_true')
-    args = parser.parse_args(sys.argv[1:])
-    # Проверяем на наличие необходимой команды
-    if len(args.command) == 0:
-        print('No command. Set "list" or "host HOSTNAME"', file=sys.stderr)
-        sys.exit(1)
-    if args.command[0] != "list" and args.command[0] != "host":
-        print(
-            "Incorrect command: "
-            + args.command[0]
-            + '\tUse "list" or "host HOSTNAME" command',
-            file=sys.stderr,
-        )
-        sys.exit(1)
+def usage() -> None:
+    print("termister [-c config_file.yaml]\nCommands:\n\tlist|l [group ...]\n\tsearch|s regexp \n\thost_name_or_IP")
 
-    # Set config file
-    # default value is
-    conf_file = "/etc/termister/termister.yaml"
-    if args.configfile:
-        # command line argument have 1-st priority
-        conf_file = args.configfile
-    elif os.getenv("TER_CONF"):
-        # take file fron env variable
+
+
+def run_app(commands: list) -> None:
+    match commands:
+        case ["list" | "l", *group]:
+            termister = Termister(config_file=conf_file)
+            termister.list(group)
+        case ["search" | "s", host]:
+            termister = Termister(config_file=conf_file)
+            termister.search(host)
+        case [host]:
+            print(f"host - {host}")
+        case _:
+            print(f"Unknown command: {' '.join(commands)}")
+            usage()
+
+
+if __name__ == "__main__":
+    if os.getenv("TER_CONF"):
         conf_file = os.getenv("TER_CONF")
 
-    # Read configs ans set list of groups and hosts
-    termister = Termister(config_file=conf_file)
-
-    # select and run command
-    if args.command[0] == "list":
-        if len(args.command) == 1:
-            termister.list("", args.group)
-        elif len(args.command) == 2:
-            termister.list(args.command[1], args.group)
-        else:
-            print('Invalid numbers of argument command "list"', file=sys.stderr)
-            sys.exit(1)
-
-    elif args.command[0] == "host":
-        if len(args.command) != 2:
-            print('Invalid numbers of argument command "host"', file=sys.stderr)
-            sys.exit(1)
-        termister.connect_to_host(args.command[1])
+    # Разбор параметров программы
+    match sys.argv[1:]:
+        case ['-c', c_file, *commands]:
+            conf_file = c_file
+            run_app(commands)
+        case [*commands]:
+            run_app(commands)
+        case _:
+            usage()
