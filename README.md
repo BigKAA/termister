@@ -1,23 +1,34 @@
 # Termister
 
-Оболочка над ssh. Позволяет в конфигурационных файлах сохранить списки и параметры серверов,
-разбитые на группы.
+Оболочка над ssh. Для подключения к хостам использует данные из конфигурационных файлов.
+
+Сервера разделяются на группы
 
 **Почему?** Не нашел на маке нормального бесплатного эмулятора терминала с возможностью сохранения
 параметров соединений к ssh серверам. Наваять полноценную программу для мак я не смогу, знаний
 нет. Как вариант использовать java... Решил не извращаться и написать оболочку для командной
 строки.
 
+    termister [-c config_file.yaml]
+    Commands:
+            list|l [group ...]
+            search|s regexp 
+            host_name_or_IP
+
+**Внимание!** Для работы приложения требуется python версии >= 3.10
+
 ## Команды
-### list
+### list или l
 
 Получение списка серверов.
+
+    termister list|l [group_name ...]
 
 ```shell
 ./termister.py list
 ```
 
-На экране получим что то типа:
+На экране получим что-то типа:
 
 ```
 moon    Moon servers
@@ -34,48 +45,52 @@ Beta    Beta servers
         Host: 192.168.0.18      Port: 12332     User: root      Server for test 4
 ```
 
-В качестве дополнительного параметра можно указать регулярное выражение для поиска в именах хостов.
-
-```bash
-./termister.py list 192.168.10
+```shell
+./termister.py l solar romb
 ```
 
-На стандартном выводе:
+На экране получим что-то типа:
 
 ```
-moon    Moon servers
-        Host: 192.168.10.5      Server for test 1       Port: 22        User: root
-        Host: 192.168.10.8      Server for test 2       Port: 22        User: root
 romb    Romb servers
+        Host: 192.168.11.17     Port: 22        User: root      Server for test 3
+        Host: 192.168.11.18     Port: 12332     User: root      Server for test 4
 solar   Solar servers
-Beta    Beta servers
+        Host: 192.168.0.134     Port: 22        User: artur     Solar system
+        Host: 192.168.0.8       Port: 22        User: root      Solar system  2
 ```
 
-Параметр `-g group_name` ограничивает вывод списка серверов из одной группы.
 
-```bash
-./termister.py list -g moon
-```
+### search или s
 
-```
-moon    Moon servers
-        Host: 192.168.10.5      Server for test 1       Port: 22        User: root
-        Host: 192.168.10.8      Server for test 2       Port: 22        User: root
-```
+Поиск в списке хостов или их описаний.
 
-### host
-
-Подключение к серверу:
+    termister search|s regexp
 
 ```shell
-./termister.py host 192.168.11.18
+./termister.py -c etc/termister/termister.yaml s "test 2"
 ```
 
-Остальные параметры подключения будут взяты из конфигурационного файла.
+```shell
+ moon    Moon servers
+        Host: 192.168.10.8      Server for test 2       Port: 22        User: root
+ romb    Romb servers
+ solar   Solar servers
+ Beta    Beta servers
+```
+
+### host name
+
+Для подключения к хосту в качестве аргумента необходимо указать имя хоста, так как оно было описано в
+конфигурационном файле.
+
+```shell
+./termister.py -c etc/termister/termister.yaml 192.168.10.8
+```
 
 ## Config files
 
-Расположение основного конфигурационного файла определяется параметром `-c` или `--configfile`.
+Расположение основного конфигурационного файла определяется параметром `-c`.
 Если параметр не определён, смотрится содержимое переменной среды окружения `TER_CONF`.
 Если переменная не определена, используется значение по умолчанию `/etc/termister/termister.yaml`.
 
@@ -122,7 +137,7 @@ group:
 
 ## Дополнительные библиотеки
 
-Для работы программы необходим Python3 и пара библиотек из файла `requirements.txt`.
+Для работы программы необходим Python3 версии 3.10 или более. И библиотеки из файла `requirements.txt`.
 
 ```shell
 pip3 install -r requirements.txt
